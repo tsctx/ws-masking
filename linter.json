@@ -1,0 +1,20 @@
+{
+  "$schema": "https://biomejs.dev/schemas/1.7.3/schema.json",
+  "linter": {
+    "rules": {
+      "recommended": true,
+      "complexity": {
+        "useArrowFunction": "off"
+      },
+      "suspicious": {
+        "noRedundantUseStrict": "off"
+      }
+    },
+    "ignore": [
+      "./dist/*",
+      "./tsconfig.json",
+      "./tsconfig.base.json",
+      "./tsconfig.types.json"
+    ]
+  }
+}

@@ -1,0 +1,62 @@
+{
+  "name": "ws-masking",
+  "description": "",
+  "version": "0.0.1",
+  "type": "commonjs",
+  "author": "tsctx",
+  "license": "MIT",
+  "sideEffects": false,
+  "main": "./index.js",
+  "types": "./types/index.d.ts",
+  "readme": "README.md",
+  "exports": {
+    ".": [
+      {
+        "types": "./types/index.d.ts",
+        "default": "./index.js"
+      }
+    ]
+  },
+  "files": [
+    "LICENSE.txt",
+    "README.md",
+    "assets/*.js",
+    "index.js",
+    "types/**/*.ts"
+  ],
+  "typesVersions": {
+    "*": {}
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^1.7.3",
+    "@types/node": "^20.12.12",
+    "bufferutil": "^4.0.8",
+    "mitata": "^0.1.11",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "yarn build:types",
+    "prebuild:types": "node ./scripts/pretypes.mjs",
+    "build:types": "tsc -p ./tsconfig.types.json",
+    "lint": "biome lint ./",
+    "lint:ci": "biome ci --formatter-enabled=true --linter-enabled=true ./",
+    "lint:tsc": "tsc --noEmit",
+    "lint:fix": "biome lint --apply-unsafe ./",
+    "format": "biome format ./",
+    "format:fix": "biome format --write ./"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tsctx/ws-masking.git"
+  },
+  "bugs": {
+    "url": "https://github.com/tsctx/ws-masking/issues"
+  }
+}
