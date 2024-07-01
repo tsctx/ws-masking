@@ -3,23 +3,7 @@
 import { randomBytes } from "node:crypto";
 import bufferutil from "bufferutil";
 import { bench, group, run } from "mitata";
-import js from "../index.js";
-import wsm from "../wasm-sync.js";
-
-/**
- * @param {Uint8Array} source
- * @param {Uint8Array} mask
- * @param {Uint8Array} output
- * @param {number} offset
- * @param {number} length
- * @returns {Uint8Array}
- */
-function maskJs(source, mask, output, offset, length) {
-  for (let i = 0; i < length; ++i) {
-    output[offset + i] = source[i] ^ mask[i & 3];
-  }
-  return output;
-}
+import { initialize } from "../initialize-wasm-sync.js";
 
 const settings = {
   "32b": 32,
@@ -37,6 +21,9 @@ const settings = {
 
 const mask = randomBytes(4);
 
+const wsm64Kib = initialize({ memory: 1 });
+const wsm1Mib = initialize({ memory: 16 });
+
 const pool = new Uint8Array(
   Buffer.allocUnsafeSlow(Math.max(...Object.values(settings))).buffer,
 );
@@ -44,17 +31,12 @@ const pool = new Uint8Array(
 for (const [name, length] of Object.entries(settings)) {
   const buffer = randomBytes(length);
   group(`mask - ${name}`, () => {
-    bench("ws-masking - wasm (simd)", () => {
-      return wsm.mask(buffer, mask, pool, 0, length);
+    bench("ws-masking1 64Kib", () => {
+      return wsm64Kib.mask(buffer, mask, pool, 0, length);
     });
-    bench("ws-masking - js", () => {
-      return js.mask(buffer, mask, pool, 0, length);
+    bench("ws-masking 1Mib", () => {
+      return wsm1Mib.mask(buffer, mask, pool, 0, length);
     });
-    if (length < 1024 * 1024) {
-      bench("js", () => {
-        return maskJs(buffer, mask, pool, 0, length);
-      });
-    }
     bench("bufferutil", () => {
       return bufferutil.mask(buffer, mask, pool, 0, length);
     });

@@ -15,6 +15,18 @@
         "types": "./types/index.d.ts",
         "default": "./index.js"
       }
+    ],
+    "./wasm": [
+      {
+        "types": "./types/wasm.d.ts",
+        "default": "./wasm.js"
+      }
+    ],
+    "./wasm-sync": [
+      {
+        "types": "./types/wasm-sync.d.ts",
+        "default": "./wasm-sync.js"
+      }
     ]
   },
   "files": [
@@ -22,20 +34,27 @@
     "README.md",
     "assets/*.js",
     "index.js",
+    "wasm-sync.js",
+    "wasm.js",
+    "initialize.js",
+    "initialize-wasm-sync.js",
     "types/**/*.ts"
   ],
   "typesVersions": {
-    "*": {}
+    "*": {
+      "wasm": ["./types/wasm.d.ts"],
+      "wasm-sync": ["./types/wasm-sync.d.ts"]
+    }
   },
   "engines": {
     "node": ">=18.0.0"
   },
   "devDependencies": {
-    "@biomejs/biome": "^1.7.3",
-    "@types/node": "^20.12.12",
+    "@biomejs/biome": "^1.8.2",
+    "@types/node": "^20.14.8",
     "bufferutil": "^4.0.8",
     "mitata": "^0.1.11",
-    "typescript": "^5.4.5"
+    "typescript": "^5.5.2"
   },
   "scripts": {
     "build": "yarn build:types",
@@ -44,7 +63,7 @@
     "lint": "biome lint ./",
     "lint:ci": "biome ci --formatter-enabled=true --linter-enabled=true ./",
     "lint:tsc": "tsc --noEmit",
-    "lint:fix": "biome lint --apply-unsafe ./",
+    "lint:fix": "biome lint --write --unsafe ./",
     "format": "biome format ./",
     "format:fix": "biome format --write ./"
   },

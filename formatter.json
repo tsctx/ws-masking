@@ -1,5 +1,5 @@
 {
-  "$schema": "https://biomejs.dev/schemas/1.7.3/schema.json",
+  "$schema": "https://biomejs.dev/schemas/1.8.2/schema.json",
   "formatter": {
     "ignore": [
       "./dist/*",
@@ -16,7 +16,7 @@
       "semicolons": "always",
       "lineWidth": 80,
       "quoteStyle": "double",
-      "trailingComma": "all",
+      "trailingCommas": "all",
       "arrowParentheses": "always",
       "quoteProperties": "asNeeded",
       "bracketSameLine": false,
