@@ -1,8 +1,8 @@
 /**
  * @param {{ memory?: number }} init
  * @returns {{
- *   mask: (source: Uint8Array, mask: Uint8Array, output: Uint8Array, offset: number, length: number) => Uint8Array
- *   unmask: (buffer: Uint8Array, mask: Uint8Array) => Uint8Array
+ *   mask: (source: Uint8Array, mask: Uint8Array | number[], output: Uint8Array, offset: number, length: number) => Uint8Array
+ *   unmask: (buffer: Uint8Array, mask: Uint8Array | number[]) => Uint8Array
  * }}
  */
 export function initialize(init?: {
@@ -10,10 +10,10 @@ export function initialize(init?: {
 }): {
   mask: (
     source: Uint8Array,
-    mask: Uint8Array,
+    mask: Uint8Array | number[],
     output: Uint8Array,
     offset: number,
     length: number,
   ) => Uint8Array;
-  unmask: (buffer: Uint8Array, mask: Uint8Array) => Uint8Array;
+  unmask: (buffer: Uint8Array, mask: Uint8Array | number[]) => Uint8Array;
 };

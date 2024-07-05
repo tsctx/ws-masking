@@ -7,12 +7,12 @@ const simd = require("./assets/simd");
 const js = require("./assets/js");
 
 /**
- * @type {((source: Uint8Array, mask: Uint8Array, output: Uint8Array, offset: number, length: number) => Uint8Array) | undefined}
+ * @type {((source: Uint8Array, mask: Uint8Array | number[], output: Uint8Array, offset: number, length: number) => Uint8Array) | undefined}
  */
 let _mask_ = undefined;
 
 /**
- * @type {((buffer: Uint8Array, mask: Uint8Array) => Uint8Array) | undefined}
+ * @type {((buffer: Uint8Array, mask: Uint8Array | number[]) => Uint8Array) | undefined}
  */
 let _unmask_ = undefined;
 
@@ -62,7 +62,7 @@ async function initialize() {
 
   /**
    * @param {Uint8Array} buffer
-   * @param {Uint8Array} mask
+   * @param {Uint8Array | number[]} mask
    * @param {number} length
    * @returns {Uint8Array}
    */
@@ -74,7 +74,7 @@ async function initialize() {
 
   /**
    * @param {Uint8Array} source
-   * @param {Uint8Array} mask
+   * @param {Uint8Array | number[]} mask
    * @param {Uint8Array} output
    * @param {number} offset
    * @param {number} length
@@ -114,7 +114,7 @@ async function initialize() {
 
   /**
    * @param {Uint8Array} buffer
-   * @param {Uint8Array} mask
+   * @param {Uint8Array | number[]} mask
    * @returns {Uint8Array}
    */
   function _unmask(buffer, mask) {

@@ -8,7 +8,7 @@ import wsm from "../wasm-sync.js";
 
 /**
  * @param {Uint8Array} source
- * @param {Uint8Array} mask
+ * @param {Uint8Array | number[]} mask
  * @param {Uint8Array} output
  * @param {number} offset
  * @param {number} length

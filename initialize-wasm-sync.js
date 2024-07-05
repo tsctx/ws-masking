@@ -9,8 +9,8 @@ const js = require("./assets/js");
 /**
  * @param {{ memory?: number }} init
  * @returns {{
- *   mask: (source: Uint8Array, mask: Uint8Array, output: Uint8Array, offset: number, length: number) => Uint8Array
- *   unmask: (buffer: Uint8Array, mask: Uint8Array) => Uint8Array
+ *   mask: (source: Uint8Array, mask: Uint8Array | number[], output: Uint8Array, offset: number, length: number) => Uint8Array
+ *   unmask: (buffer: Uint8Array, mask: Uint8Array | number[]) => Uint8Array
  * }}
  */
 function initialize(init = {}) {
@@ -57,7 +57,7 @@ function initialize(init = {}) {
 
   /**
    * @param {Uint8Array} buffer
-   * @param {Uint8Array} mask
+   * @param {Uint8Array | number[]} mask
    * @param {number} length
    * @returns {Uint8Array}
    */
@@ -69,7 +69,7 @@ function initialize(init = {}) {
 
   /**
    * @param {Uint8Array} source
-   * @param {Uint8Array} mask
+   * @param {Uint8Array | number[]} mask
    * @param {Uint8Array} output
    * @param {number} offset
    * @param {number} length
@@ -109,7 +109,7 @@ function initialize(init = {}) {
 
   /**
    * @param {Uint8Array} buffer
-   * @param {Uint8Array} mask
+   * @param {Uint8Array | number[]} mask
    * @returns {Uint8Array}
    */
   function _unmask(buffer, mask) {
