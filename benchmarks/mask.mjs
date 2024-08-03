@@ -3,7 +3,7 @@
 import { randomBytes } from "node:crypto";
 import bufferutil from "bufferutil";
 import { bench, group, run } from "mitata";
-import js from "../index.js";
+import js from "../js.js";
 import wsm from "../wasm-sync.js";
 
 /**

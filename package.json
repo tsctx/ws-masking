@@ -27,6 +27,12 @@
         "types": "./types/wasm-sync.d.ts",
         "default": "./wasm-sync.js"
       }
+    ],
+    "./js": [
+      {
+        "types": "./types/js.d.ts",
+        "default": "./js.js"
+      }
     ]
   },
   "files": [
@@ -37,13 +43,16 @@
     "wasm-sync.js",
     "wasm.js",
     "initialize.js",
+    "js.js",
+    "default.js",
     "initialize-wasm-sync.js",
     "types/**/*.ts"
   ],
   "typesVersions": {
     "*": {
       "wasm": ["./types/wasm.d.ts"],
-      "wasm-sync": ["./types/wasm-sync.d.ts"]
+      "wasm-sync": ["./types/wasm-sync.d.ts"],
+      "js": ["./types/js.d.ts"]
     }
   },
   "engines": {

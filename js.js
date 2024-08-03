@@ -2,6 +2,6 @@
 
 "use strict";
 
-const { initialize } = require("./default");
+const { initialize } = require("./initialize");
 
 module.exports = initialize();

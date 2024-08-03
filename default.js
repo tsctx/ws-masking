@@ -45,6 +45,33 @@ function initialize() {
   }
 
   /**
+   * @param {Uint8Array} buffer
+   * @param {Uint8Array | number[]} mask
+   * @param {number} length
+   * @returns {Uint8Array}
+   */
+  function fastJsMask(buffer, mask, length) {
+    const maskKey =
+      endianType === 1
+        ? mask[0] + mask[1] * 2 ** 8 + mask[2] * 2 ** 16 + (mask[3] << 24)
+        : mask[3] + mask[2] * 2 ** 8 + mask[1] * 2 ** 16 + (mask[0] << 24);
+
+    const i32Array = new Int32Array(buffer.buffer, 0, length >> 2);
+
+    for (let i = 0, l = length >> 2; i < l; ++i) {
+      i32Array[i] ^= maskKey;
+    }
+
+    if ((length & 3) !== 0) {
+      for (let i = length - (length & 3); i < length; ++i) {
+        buffer[i] = mask[i & 3];
+      }
+    }
+
+    return buffer;
+  }
+
+  /**
    * @param {Uint8Array} source
    * @param {Uint8Array | number[]} mask
    * @param {Uint8Array} output
@@ -53,6 +80,22 @@ function initialize() {
    * @returns {Uint8Array}
    */
   function _mask(source, mask, output, offset, length) {
+    if (length < 64) {
+      for (let i = 0; i < length; ++i) {
+        output[offset + i] = source[i] ^ mask[i & 3];
+      }
+      return output;
+    }
+
+    if (
+      source === output &&
+      source.length === length &&
+      source.byteLength === source.buffer.byteLength
+    ) {
+      // fast-path
+      return fastJsMask(source, mask, length);
+    }
+
     const maskKey =
       endianType === 1
         ? mask[0] + mask[1] * 2 ** 8 + mask[2] * 2 ** 16 + (mask[3] << 24)
@@ -94,11 +137,22 @@ function initialize() {
    * @returns {Uint8Array}
    */
   function _unmask(buffer, mask) {
+    const length = buffer.length;
+    if (length < 64) {
+      for (let i = 0; i < length; ++i) {
+        buffer[i] ^= mask[i & 3];
+      }
+      return buffer;
+    }
+
+    if (buffer.byteLength === buffer.buffer.byteLength) {
+      return fastJsMask(buffer, mask, length);
+    }
+
     const maskKey =
       endianType === 1
         ? mask[0] + mask[1] * 2 ** 8 + mask[2] * 2 ** 16 + (mask[3] << 24)
         : mask[3] + mask[2] * 2 ** 8 + mask[1] * 2 ** 16 + (mask[0] << 24);
-    const length = buffer.length;
     if (length <= memorySize) {
       buffer.set(jsMask(buffer, maskKey, length), 0);
     } else {
