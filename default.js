@@ -62,8 +62,9 @@ function initialize() {
         : mask[3] + mask[2] * 2 ** 8 + mask[1] * 2 ** 16 + (mask[0] << 24);
 
     const i32SArray = new Int32Array(source.buffer, 0, length >> 2);
+    const int32Length = length >> 2;
 
-    for (let i = 0, l = length >> 2; i < l; ++i) {
+    for (let i = 0; i < int32Length; ++i) {
       i32SArray[i] ^= maskKey;
     }
 
