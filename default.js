@@ -53,15 +53,18 @@ function initialize() {
    * @returns {Uint8Array}
    */
   function fastJsMask(source, mask, output, offset, length) {
+    // TODO: allow offset
+    // TODO: allow output
+    // TODO: handle byteOffset
     const maskKey =
       endianType === 1
         ? mask[0] + mask[1] * 2 ** 8 + mask[2] * 2 ** 16 + (mask[3] << 24)
         : mask[3] + mask[2] * 2 ** 8 + mask[1] * 2 ** 16 + (mask[0] << 24);
 
-    const i32Array = new Int32Array(source.buffer, 0, length >> 2);
+    const i32SArray = new Int32Array(source.buffer, 0, length >> 2);
 
     for (let i = 0, l = length >> 2; i < l; ++i) {
-      i32Array[i] ^= maskKey;
+      i32SArray[i] ^= maskKey;
     }
 
     if ((length & 3) !== 0) {
