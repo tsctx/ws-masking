@@ -39,13 +39,13 @@
     "LICENSE.txt",
     "README.md",
     "assets/*.js",
+    "collections/*.js",
     "index.js",
     "wasm-sync.js",
     "wasm.js",
     "initialize.js",
     "js.js",
-    "default.js",
-    "initialize-wasm-sync.js",
+    "zero-pool.js",
     "types/**/*.ts"
   ],
   "typesVersions": {
@@ -66,6 +66,7 @@
     "typescript": "^5.5.4"
   },
   "scripts": {
+    "test": "node --test testing/main.js",
     "build": "yarn build:types",
     "prebuild:types": "node ./scripts/pretypes.mjs",
     "build:types": "tsc -p ./tsconfig.types.json",

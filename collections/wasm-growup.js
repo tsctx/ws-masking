@@ -2,9 +2,9 @@
 
 "use strict";
 
-const standard = require("./assets/standard");
-const simd = require("./assets/simd");
-const js = require("./assets/js");
+const standard = require("../assets/standard");
+const simd = require("../assets/simd");
+const js = require("./js");
 
 /**
  * @type {((source: Uint8Array, mask: Uint8Array | number[], output: Uint8Array, offset: number, length: number) => Uint8Array) | undefined}

@@ -2,68 +2,45 @@
 
 "use strict";
 
-const standard = require("./assets/standard");
-const simd = require("./assets/simd");
-const js = require("./assets/js");
-
 /**
- * @param {{ memory?: number }} init
  * @returns {{
  *   mask: (source: Uint8Array, mask: Uint8Array | number[], output: Uint8Array, offset: number, length: number) => Uint8Array
  *   unmask: (buffer: Uint8Array, mask: Uint8Array | number[]) => Uint8Array
  * }}
  */
-function initialize(init = {}) {
-  const memory = new WebAssembly.Memory({
-    // 16 Kib
-    initial: init.memory ?? 1,
-  });
-
-  /**@type {WebAssembly.Module} */
-  let mod;
-
-  try {
-    // simd
-    mod = new WebAssembly.Module(simd);
-  } catch (_err) {
-    try {
-      // standard
-      mod = new WebAssembly.Module(standard);
-    } catch (err) {
-      // fallback
-      return {
-        mask: js.mask,
-        unmask: js.unmask,
-      };
-    }
-  }
-
-  const wasm = new WebAssembly.Instance(mod, {
-    imports: {},
-    env: {
-      memory: memory,
-    },
-  });
-
-  const viewAB = memory.buffer;
-  const view = new Uint8Array(viewAB);
+function initialize() {
+  const view = new Uint8Array(16 * 1024);
+  const viewAB = view.buffer;
+  const viewBigInt64 = new BigInt64Array(viewAB);
   const memorySize = viewAB.byteLength;
 
   /**
-   * @type {(mask1: number, mask2: number, mask3: number, mask4: number, length: number) => void}
+   * Detect endianness.
+   * @returns {number} 0 -> BE (big endian), 1 -> LE (little endian)
    */
-  //@ts-ignore
-  const execute = wasm.exports.execute;
+  function detectEndianness() {
+    const u8 = new Uint8Array([0x1, 0x0]);
+    const u16 = new Uint16Array(u8.buffer);
+    return u16[0] & 1;
+  }
+
+  const endianType = detectEndianness();
 
   /**
    * @param {Uint8Array} buffer
-   * @param {Uint8Array | number[]} mask
+   * @param {bigint} maskKey
    * @param {number} length
    * @returns {Uint8Array}
    */
-  function wasmMask(buffer, mask, length) {
+  function jsMask(buffer, maskKey, length) {
     view.set(buffer, 0);
-    execute(mask[0], mask[1], mask[2], mask[3], length);
+    const bigint32Length = length >> 3;
+    for (let i = 0; i < bigint32Length; ++i) {
+      viewBigInt64[i] ^= maskKey;
+    }
+    if ((length & 3) !== 0) {
+      viewBigInt64[bigint32Length] ^= maskKey;
+    }
     return length === memorySize ? view : new Uint8Array(viewAB, 0, length);
   }
 
@@ -76,16 +53,32 @@ function initialize(init = {}) {
    * @returns {Uint8Array}
    */
   function _mask(source, mask, output, offset, length) {
+    const maskKey =
+      endianType === 1
+        ? BigInt(
+            mask[0] + mask[1] * 2 ** 8 + mask[2] * 2 ** 16 + mask[3] * 2 ** 24,
+          ) +
+          (BigInt(
+            mask[0] + mask[1] * 2 ** 8 + mask[2] * 2 ** 16 + (mask[3] << 24),
+          ) <<
+            32n)
+        : BigInt(
+            mask[3] + mask[2] * 2 ** 8 + mask[1] * 2 ** 16 + mask[0] * 2 ** 24,
+          ) +
+          (BigInt(
+            mask[3] + mask[2] * 2 ** 8 + mask[1] * 2 ** 16 + (mask[0] << 24),
+          ) <<
+            32n);
     if (length <= memorySize) {
-      output.set(wasmMask(source, mask, length), offset);
+      output.set(jsMask(source, maskKey, length), offset);
     } else {
       let sourceOffset = 0;
       let outputOffset = offset;
       while (sourceOffset + memorySize < length) {
         output.set(
-          wasmMask(
+          jsMask(
             source.subarray(sourceOffset, sourceOffset + memorySize),
-            mask,
+            maskKey,
             memorySize,
           ),
           outputOffset,
@@ -95,9 +88,9 @@ function initialize(init = {}) {
       }
       if (sourceOffset !== length) {
         output.set(
-          wasmMask(
+          jsMask(
             source.subarray(sourceOffset, length),
-            mask,
+            maskKey,
             length - sourceOffset,
           ),
           outputOffset,
@@ -113,16 +106,32 @@ function initialize(init = {}) {
    * @returns {Uint8Array}
    */
   function _unmask(buffer, mask) {
+    const maskKey =
+      endianType === 1
+        ? BigInt(
+            mask[0] + mask[1] * 2 ** 8 + mask[2] * 2 ** 16 + mask[3] * 2 ** 24,
+          ) +
+          (BigInt(
+            mask[0] + mask[1] * 2 ** 8 + mask[2] * 2 ** 16 + (mask[3] << 24),
+          ) <<
+            32n)
+        : BigInt(
+            mask[3] + mask[2] * 2 ** 8 + mask[1] * 2 ** 16 + mask[0] * 2 ** 24,
+          ) +
+          (BigInt(
+            mask[3] + mask[2] * 2 ** 8 + mask[1] * 2 ** 16 + (mask[0] << 24),
+          ) <<
+            32n);
     const length = buffer.length;
     if (length <= memorySize) {
-      buffer.set(wasmMask(buffer, mask, length), 0);
+      buffer.set(jsMask(buffer, maskKey, length), 0);
     } else {
       let offset = 0;
       while (offset + memorySize < length) {
         buffer.set(
-          wasmMask(
+          jsMask(
             buffer.subarray(offset, offset + memorySize),
-            mask,
+            maskKey,
             memorySize,
           ),
           offset,
@@ -131,7 +140,7 @@ function initialize(init = {}) {
       }
       if (offset !== length) {
         buffer.set(
-          wasmMask(buffer.subarray(offset, length), mask, length - offset),
+          jsMask(buffer.subarray(offset, length), maskKey, length - offset),
           offset,
         );
       }

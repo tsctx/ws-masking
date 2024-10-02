@@ -2,6 +2,6 @@
 
 "use strict";
 
-const { initialize } = require("./initialize-wasm-sync");
+const { initialize } = require("./collections/initialize-wasm-sync");
 
 module.exports = initialize();

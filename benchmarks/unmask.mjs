@@ -3,10 +3,9 @@
 import { randomBytes } from "node:crypto";
 import bufferutil from "bufferutil";
 import { bench, group, run } from "mitata";
-import fJsLegacy from "../collections/js-legacy.js";
-import jsSingleOptimized from "../collections/js-single-optimized.js";
 import jsSingle from "../collections/js-single.js";
 import fJs from "../collections/js.js";
+import limited from "../collections/limited.js";
 import js from "../js.js";
 import wsm from "../wasm-sync.js";
 import zeroPool from "../zero-pool.js";
@@ -29,36 +28,30 @@ const settings = {
 
 const mask = randomBytes(4);
 
-const pool = new Uint8Array(
-  Buffer.allocUnsafeSlow(Math.max(...Object.values(settings))).buffer,
-);
-
 for (const [name, length] of Object.entries(settings)) {
   const buffer = randomBytes(length);
+  const p = new Uint8Array(buffer);
   group(`mask - ${name}`, () => {
     bench("wsm - wasm-simd", () => {
-      return wsm.mask(buffer, mask, pool, 0, length);
+      return wsm.unmask(p, mask);
     });
     bench("wsm - js", () => {
-      return js.mask(buffer, mask, pool, 0, length);
+      return js.unmask(p, mask);
     });
     bench("wsm - fallback", () => {
-      return fJs.mask(buffer, mask, pool, 0, length);
-    });
-    bench("wsm - fallback legacy", () => {
-      return fJsLegacy.mask(buffer, mask, pool, 0, length);
+      return fJs.unmask(p, mask);
     });
     bench("wsm - zero-pool", () => {
-      return zeroPool.mask(buffer, mask, pool, 0, length);
+      return zeroPool.unmask(p, mask);
     });
     bench("js - single", () => {
-      return jsSingle.mask(buffer, mask, pool, 0, length);
-    });
-    bench("js - single-optimized", () => {
-      return jsSingleOptimized.mask(buffer, mask, pool, 0, length);
+      return jsSingle.unmask(p, mask);
     });
     bench("bufferutil", () => {
-      return bufferutil.mask(buffer, mask, pool, 0, length);
+      return bufferutil.unmask(p, mask);
+    });
+    bench("fast", () => {
+      return limited.unmask(p, mask);
     });
   });
 }
