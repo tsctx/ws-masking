@@ -632,10 +632,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"mitata@npm:^1.0.10":
+"mitata-v1@npm:mitata@^1.0.10":
   version: 1.0.10
   resolution: "mitata@npm:1.0.10"
   checksum: 10c0/ab118795e29f9c61eadbe48d7315132e6fd5a8d297750eb4a339bb63dc2067449aa755dfa5cb5461d92716bcb9293693817f055e55896d5d2ea36b1ab7696c75
+  languageName: node
+  linkType: hard
+
+"mitata@npm:0.1.14":
+  version: 0.1.14
+  resolution: "mitata@npm:0.1.14"
+  checksum: 10c0/c96950839cec2a23a76503ecaced4ba0b73b571ea7062a34106744a182fb0f49c888e1ad829752ee0c40bfa4b3fdf37a90076bc0499422c880917e5afa03adce
   languageName: node
   linkType: hard
 
@@ -994,7 +1001,8 @@ __metadata:
     "@biomejs/biome": "npm:^1.9.3"
     "@types/node": "npm:^22.7.4"
     bufferutil: "npm:^4.0.8"
-    mitata: "npm:^1.0.10"
+    mitata: "npm:0.1.14"
+    mitata-v1: "npm:mitata@^1.0.10"
     typescript: "npm:^5.6.2"
   languageName: unknown
   linkType: soft

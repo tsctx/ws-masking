@@ -6,9 +6,9 @@ import { bench, group, run } from "mitata";
 import jsSingle from "../collections/js-single.js";
 import fJs from "../collections/js.js";
 import limited from "../collections/limited.js";
-import js from "../js.js";
+import zeroPool from "../collections/zero-pool.js";
+import js from "../index.js";
 import wsm from "../wasm-sync.js";
-import zeroPool from "../zero-pool.js";
 // import wsmUBI from "../collections/initialize-ubigint.js";
 // const wsmUBigint = wsmUBI.initialize();
 

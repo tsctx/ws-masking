@@ -3,8 +3,8 @@
 const { mask } = require("../collections/js");
 const wasm = require("../wasm");
 const wasmSync = require("../wasm-sync");
-const js = require("../js");
-const zeroPool = require("../zero-pool");
+const js = require("../index");
+const zeroPool = require("../collections/zero-pool");
 const test = require("node:test");
 const equal = require("./_util/equal");
 const assert = require("./_util/assert");

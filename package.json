@@ -30,8 +30,8 @@
     ],
     "./js": [
       {
-        "types": "./types/js.d.ts",
-        "default": "./js.js"
+        "types": "./types/index.d.ts",
+        "default": "./index.js"
       }
     ]
   },
@@ -43,16 +43,13 @@
     "index.js",
     "wasm-sync.js",
     "wasm.js",
-    "initialize.js",
-    "js.js",
-    "zero-pool.js",
     "types/**/*.ts"
   ],
   "typesVersions": {
     "*": {
       "wasm": ["./types/wasm.d.ts"],
       "wasm-sync": ["./types/wasm-sync.d.ts"],
-      "js": ["./types/js.d.ts"]
+      "js": ["./types/index.d.ts"]
     }
   },
   "engines": {
@@ -62,7 +59,8 @@
     "@biomejs/biome": "^1.9.3",
     "@types/node": "^22.7.4",
     "bufferutil": "^4.0.8",
-    "mitata": "^1.0.10",
+    "mitata": "0.1.14",
+    "mitata-v1": "npm:mitata@^1.0.10",
     "typescript": "^5.6.2"
   },
   "scripts": {
