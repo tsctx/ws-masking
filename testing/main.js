@@ -8,6 +8,7 @@ const zeroPool = require("../collections/zero-pool");
 const test = require("node:test");
 const equal = require("./_util/equal");
 const assert = require("./_util/assert");
+const ws = require("./ws");
 
 test.describe("main", async () => {
   await wasm.initialize();
@@ -39,13 +40,12 @@ test.describe("main", async () => {
       const bOutput = new Uint8Array(length);
       for (let i = 0; i <= 20000; ++i) {
         u32MaskKey[0] = Math.floor(Math.random() * 0xffffffff);
-        assert(
-          equal.buffer(
-            mask(source, u8MaskKey, aOutput, 0, length),
-            f.mask(source, u8MaskKey, bOutput, 0, length),
-          ),
-        );
+        mask(source, u8MaskKey, aOutput, 0, length);
+        f.mask(source, u8MaskKey, bOutput, 0, length);
+        assert(equal.buffer(aOutput, bOutput));
       }
     });
+
+    ws(f);
   }
 });

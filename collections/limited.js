@@ -17,23 +17,35 @@ const endianType = detectEndianness();
 /**
  * @param {Uint8Array} source
  * @param {Uint8Array | number[]} mask
- * @returns {Uint8Array}
+ * @param {number} offset
+ * @param {number} length
+ * @returns {void}
  */
-function fastMask(source, mask) {
-  if (source.byteLength !== source.buffer.byteLength) {
+function fastMask(source, mask, offset, length) {
+  if (source.byteLength !== source.buffer.byteLength || (offset & 3) !== 0) {
     throw new TypeError("Assertion failed.");
   }
 
-  const length = source.length;
   const maskKey =
     endianType === 1
       ? mask[0] + mask[1] * 2 ** 8 + mask[2] * 2 ** 16 + (mask[3] << 24)
       : mask[3] + mask[2] * 2 ** 8 + mask[1] * 2 ** 16 + (mask[0] << 24);
 
   const int32Length = length >> 2;
-  const i32Array = new Int32Array(source.buffer, 0, int32Length);
+  const i32Array = new Int32Array(source.buffer, offset, int32Length);
 
-  for (let i = 0; i < int32Length; ++i) {
+  const unrollInt32Length = int32Length - (int32Length & 7);
+  for (let startIndex = 0; startIndex < unrollInt32Length; startIndex += 8) {
+    i32Array[startIndex] ^= maskKey;
+    i32Array[startIndex + 1] ^= maskKey;
+    i32Array[startIndex + 2] ^= maskKey;
+    i32Array[startIndex + 3] ^= maskKey;
+    i32Array[startIndex + 4] ^= maskKey;
+    i32Array[startIndex + 5] ^= maskKey;
+    i32Array[startIndex + 6] ^= maskKey;
+    i32Array[startIndex + 7] ^= maskKey;
+  }
+  for (let i = unrollInt32Length; i < int32Length; ++i) {
     i32Array[i] ^= maskKey;
   }
 
@@ -42,8 +54,6 @@ function fastMask(source, mask) {
       source[i] = mask[i & 3];
     }
   }
-
-  return source;
 }
 
 /**
@@ -52,27 +62,28 @@ function fastMask(source, mask) {
  * @param {Uint8Array} output
  * @param {number} offset
  * @param {number} length
- * @returns {Uint8Array}
+ * @returns {void}
  */
 function mask(source, mask, output, offset, length) {
-  if (
-    source !== output ||
-    offset !== 0 ||
-    length !== source.length ||
-    source.byteLength !== source.buffer.byteLength
-  ) {
+  if ((offset & 3) !== 0 || source.byteLength !== source.buffer.byteLength) {
     throw new TypeError("Assertion failed.");
   }
-  return fastMask(source, mask);
+  if (source !== output || offset !== 0) {
+    output.set(
+      source.length === length ? source : source.subarray(0, length),
+      offset,
+    );
+  }
+  return fastMask(output, mask, 0, length);
 }
 
 /**
  * @param {Uint8Array} buffer
  * @param {Uint8Array | number[]} mask
- * @returns {Uint8Array}
+ * @returns {void}
  */
 function unmask(buffer, mask) {
-  return fastMask(buffer, mask);
+  return fastMask(buffer, mask, 0, buffer.length);
 }
 
 module.exports = {

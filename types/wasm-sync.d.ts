@@ -5,7 +5,7 @@ declare const _exports: {
     output: Uint8Array,
     offset: number,
     length: number,
-  ) => Uint8Array;
-  unmask: (buffer: Uint8Array, mask: Uint8Array | number[]) => Uint8Array;
+  ) => void;
+  unmask: (buffer: Uint8Array, mask: Uint8Array | number[]) => void;
 };
 export = _exports;

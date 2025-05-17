@@ -56,12 +56,12 @@
     "node": ">=18.0.0"
   },
   "devDependencies": {
-    "@biomejs/biome": "^1.9.3",
-    "@types/node": "^22.7.4",
-    "bufferutil": "^4.0.8",
+    "@biomejs/biome": "^1.9.4",
+    "@types/node": "^22.15.3",
+    "bufferutil": "^4.0.9",
     "mitata": "0.1.14",
-    "mitata-v1": "npm:mitata@^1.0.10",
-    "typescript": "^5.6.2"
+    "mitata-v1": "npm:mitata@^1.0.34",
+    "typescript": "^5.8.3"
   },
   "scripts": {
     "test": "node --test testing/main.js",
@@ -73,7 +73,10 @@
     "lint:tsc": "tsc --noEmit",
     "lint:fix": "biome lint --write --unsafe ./",
     "format": "biome format ./",
-    "format:fix": "biome format --write ./"
+    "check": "biome check --organize-imports-enabled=true --formatter-enabled=true --linter-enabled=true --write --unsafe ./",
+    "check:fix": "biome check --organize-imports-enabled=true --formatter-enabled=true --linter-enabled=true --write --unsafe ./",
+    "format:fix": "biome format --write ./",
+    "benchmarks-mask:jitless": "node --jitless ./benchmarks/mask.mjs"
   },
   "publishConfig": {
     "access": "public",

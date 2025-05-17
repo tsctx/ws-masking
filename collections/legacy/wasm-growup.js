@@ -2,9 +2,9 @@
 
 "use strict";
 
-const standard = require("../assets/standard");
-const simd = require("../assets/simd");
-const { __js_module } = require("./internal-js-module");
+const standard = require("../../assets/standard");
+const simd = require("../../assets/simd");
+const { __js_module } = require("../internal-js-module");
 
 /**
  * @returns {{
@@ -53,9 +53,19 @@ function initialize() {
     });
   }
 
-  const viewAB = memory.buffer;
-  const view = new Uint8Array(viewAB);
-  const memorySize = viewAB.byteLength;
+  let view = new Uint8Array(memory.buffer);
+  let memorySize = memory.buffer.byteLength;
+
+  /**
+   * @param {number} length
+   */
+  function glowUp(length) {
+    if (length > memorySize) {
+      memory.grow(Math.ceil(memorySize - length) / (2 << 15));
+      view = new Uint8Array(memory.buffer);
+      memorySize = memory.buffer.byteLength;
+    }
+  }
 
   /**
    * @type {(mask: number, length: number) => void}
@@ -76,7 +86,9 @@ function initialize() {
       mask[0] + mask[1] * 2 ** 8 + mask[2] * 2 ** 16 + (mask[3] << 24),
       length,
     );
-    return length === memorySize ? view : new Uint8Array(viewAB, 0, length);
+    return length === memorySize
+      ? view
+      : new Uint8Array(view.buffer, 0, length);
   }
 
   /**
@@ -88,34 +100,10 @@ function initialize() {
    * @returns {void}
    */
   function _mask(source, mask, output, offset, length) {
-    if (length <= memorySize) {
-      output.set(wasmMask(source, mask, length), offset);
-    } else {
-      let sourceOffset = 0;
-      let outputOffset = offset;
-      while (sourceOffset + memorySize < length) {
-        output.set(
-          wasmMask(
-            source.subarray(sourceOffset, sourceOffset + memorySize),
-            mask,
-            memorySize,
-          ),
-          outputOffset,
-        );
-        outputOffset += memorySize;
-        sourceOffset += memorySize;
-      }
-      if (sourceOffset !== length) {
-        output.set(
-          wasmMask(
-            source.subarray(sourceOffset, length),
-            mask,
-            length - sourceOffset,
-          ),
-          outputOffset,
-        );
-      }
+    if (length > memorySize) {
+      glowUp(length);
     }
+    output.set(wasmMask(source, mask, length), offset);
   }
 
   /**
@@ -125,28 +113,10 @@ function initialize() {
    */
   function _unmask(buffer, mask) {
     const length = buffer.length;
-    if (length <= memorySize) {
-      buffer.set(wasmMask(buffer, mask, length), 0);
-    } else {
-      let offset = 0;
-      while (offset + memorySize < length) {
-        buffer.set(
-          wasmMask(
-            buffer.subarray(offset, offset + memorySize),
-            mask,
-            memorySize,
-          ),
-          offset,
-        );
-        offset += memorySize;
-      }
-      if (offset !== length) {
-        buffer.set(
-          wasmMask(buffer.subarray(offset, length), mask, length - offset),
-          offset,
-        );
-      }
+    if (length > memorySize) {
+      glowUp(length);
     }
+    buffer.set(wasmMask(buffer, mask, length), 0);
   }
 
   return {
@@ -155,4 +125,4 @@ function initialize() {
   };
 }
 
-module.exports = { initialize };
+module.exports = initialize();

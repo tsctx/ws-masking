@@ -2,6 +2,4 @@
 
 "use strict";
 
-const { initialize } = require("./collections/initialize");
-
-module.exports = initialize();
+module.exports = require("./collections/zero-pool");

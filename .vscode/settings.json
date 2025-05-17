@@ -1,0 +1,10 @@
+{
+  "files.associations": {
+    "xmmintrin.h": "c",
+    "system_error": "c",
+    "xlocale": "c",
+    "stdio.h": "c",
+    "intrin.h": "c",
+    "napi.h": "c"
+  }
+}

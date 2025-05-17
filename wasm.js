@@ -5,14 +5,15 @@
 const standard = require("./assets/standard");
 const simd = require("./assets/simd");
 const js = require("./collections/js");
+const { __js_module } = require("./collections/internal-js-module");
 
 /**
- * @type {((source: Uint8Array, mask: Uint8Array | number[], output: Uint8Array, offset: number, length: number) => Uint8Array) | undefined}
+ * @type {((source: Uint8Array, mask: Uint8Array | number[], output: Uint8Array, offset: number, length: number) => void) | undefined}
  */
 let _mask_ = undefined;
 
 /**
- * @type {((buffer: Uint8Array, mask: Uint8Array | number[]) => Uint8Array) | undefined}
+ * @type {((buffer: Uint8Array, mask: Uint8Array | number[]) => void) | undefined}
  */
 let _unmask_ = undefined;
 
@@ -20,42 +21,51 @@ let _unmask_ = undefined;
  * @returns {Promise<void>}
  */
 async function initialize() {
-  const memory = new WebAssembly.Memory({
-    // 16 Kib
-    initial: 1,
-  });
+  /**@type {WebAssembly.Memory} */
+  let memory;
+  /**@type {WebAssembly.Instance} */
+  let wasm;
+  if (typeof WebAssembly === "undefined") {
+    const { memory: _memory, wasm: _wasm } = __js_module();
 
-  /**@type {WebAssembly.Module} */
-  let mod;
+    memory = _memory;
 
-  try {
-    // simd
-    mod = await WebAssembly.compile(simd);
-  } catch (_err) {
+    wasm = _wasm;
+  } else {
+    memory = new WebAssembly.Memory({
+      // 16 Kib
+      initial: 1,
+    });
+
+    /**@type {WebAssembly.Module} */
+    let mod;
+
     try {
-      // standard
-      mod = await WebAssembly.compile(standard);
-    } catch (err) {
-      // fallback
-      _mask_ = js.mask;
-      _unmask_ = js.unmask;
-      return;
+      // simd
+      mod = await WebAssembly.compile(simd);
+    } catch (_err) {
+      try {
+        // standard
+        mod = await WebAssembly.compile(standard);
+      } catch (err) {
+        // fallback
+        throw err ?? _err ?? new Error("Unsupported");
+      }
     }
+
+    wasm = await WebAssembly.instantiate(mod, {
+      imports: {},
+      env: {
+        memory: memory,
+      },
+    });
   }
-
-  const wasm = await WebAssembly.instantiate(mod, {
-    imports: {},
-    env: {
-      memory: memory,
-    },
-  });
-
   const viewAB = memory.buffer;
   const view = new Uint8Array(viewAB);
   const memorySize = viewAB.byteLength;
 
   /**
-   * @type {(mask1: number, mask2: number, mask3: number, mask4: number, length: number) => void}
+   * @type {(mask: number, length: number) => void}
    */
   //@ts-ignore
   const execute = wasm.exports.execute;
@@ -68,7 +78,11 @@ async function initialize() {
    */
   function wasmMask(buffer, mask, length) {
     view.set(buffer, 0);
-    execute(mask[0], mask[1], mask[2], mask[3], length);
+    // WebAssembly memory is always little-endian.
+    execute(
+      mask[0] + mask[1] * 2 ** 8 + mask[2] * 2 ** 16 + (mask[3] << 24),
+      length,
+    );
     return length === memorySize ? view : new Uint8Array(viewAB, 0, length);
   }
 
@@ -78,7 +92,7 @@ async function initialize() {
    * @param {Uint8Array} output
    * @param {number} offset
    * @param {number} length
-   * @returns {Uint8Array}
+   * @returns {void}
    */
   function _mask(source, mask, output, offset, length) {
     if (length <= memorySize) {
@@ -109,13 +123,12 @@ async function initialize() {
         );
       }
     }
-    return output;
   }
 
   /**
    * @param {Uint8Array} buffer
    * @param {Uint8Array | number[]} mask
-   * @returns {Uint8Array}
+   * @returns {void}
    */
   function _unmask(buffer, mask) {
     const length = buffer.length;
@@ -141,7 +154,6 @@ async function initialize() {
         );
       }
     }
-    return buffer;
   }
 
   _mask_ = _mask;
@@ -157,7 +169,7 @@ let promise;
  * @param {Uint8Array} output
  * @param {number} offset
  * @param {number} length
- * @returns {Uint8Array}
+ * @returns {void}
  */
 function _mask(source, mask, output, offset, length) {
   if (typeof _mask_ === "function") {
@@ -170,7 +182,7 @@ function _mask(source, mask, output, offset, length) {
 /**
  * @param {Uint8Array} buffer
  * @param {Uint8Array} mask
- * @returns {Uint8Array}
+ * @returns {void}
  */
 function _unmask(buffer, mask) {
   if (typeof _unmask_ === "function") {

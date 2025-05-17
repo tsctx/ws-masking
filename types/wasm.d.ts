@@ -5,7 +5,7 @@ export function initialize(): Promise<void>;
  * @param {Uint8Array} output
  * @param {number} offset
  * @param {number} length
- * @returns {Uint8Array}
+ * @returns {void}
  */
 export function mask(
   source: Uint8Array,
@@ -13,10 +13,10 @@ export function mask(
   output: Uint8Array,
   offset: number,
   length: number,
-): Uint8Array;
+): void;
 /**
  * @param {Uint8Array} buffer
  * @param {Uint8Array} mask
- * @returns {Uint8Array}
+ * @returns {void}
  */
-export function unmask(buffer: Uint8Array, mask: Uint8Array): Uint8Array;
+export function unmask(buffer: Uint8Array, mask: Uint8Array): void;

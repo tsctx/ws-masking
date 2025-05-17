@@ -4,14 +4,15 @@
 
 /**
  * @returns {{
- *   mask: (source: Uint8Array, mask: Uint8Array | number[], output: Uint8Array, offset: number, length: number) => Uint8Array
- *   unmask: (buffer: Uint8Array, mask: Uint8Array | number[]) => Uint8Array
+ *   mask: (source: Uint8Array, mask: Uint8Array | number[], output: Uint8Array, offset: number, length: number) => void
+ *   unmask: (buffer: Uint8Array, mask: Uint8Array | number[]) => void
  * }}
  */
 function initialize() {
   const view = new Uint8Array(16 * 1024);
   const viewAB = view.buffer;
-  const viewBigInt64 = new BigInt64Array(viewAB);
+  // const viewBigInt64 = new BigInt64Array(viewAB);
+  const viewBigUint64 = new BigUint64Array(viewAB);
   const memorySize = viewAB.byteLength;
 
   /**
@@ -34,12 +35,18 @@ function initialize() {
    */
   function jsMask(buffer, maskKey, length) {
     view.set(buffer, 0);
-    const bigint32Length = length >> 3;
-    for (let i = 0; i < bigint32Length; ++i) {
-      viewBigInt64[i] ^= maskKey;
+    const bigint64Length = length >> 3;
+    // for (let i = 0; i < bigint64Length; ++i) {
+    //   viewBigInt64[i] ^= maskKey;
+    // }
+    // if ((length & 7) !== 0) {
+    //   viewBigInt64[bigint64Length] ^= maskKey;
+    // }
+    for (let i = 0; i < bigint64Length; ++i) {
+      viewBigUint64[i] ^= maskKey;
     }
-    if ((length & 3) !== 0) {
-      viewBigInt64[bigint32Length] ^= maskKey;
+    if ((length & 7) !== 0) {
+      viewBigUint64[bigint64Length] ^= maskKey;
     }
     return length === memorySize ? view : new Uint8Array(viewAB, 0, length);
   }
@@ -50,25 +57,34 @@ function initialize() {
    * @param {Uint8Array} output
    * @param {number} offset
    * @param {number} length
-   * @returns {Uint8Array}
+   * @returns {void}
    */
   function _mask(source, mask, output, offset, length) {
-    const maskKey =
+    // const maskKey =
+    //   endianType === 1
+    //     ? BigInt(
+    //         mask[0] + mask[1] * 2 ** 8 + mask[2] * 2 ** 16 + mask[3] * 2 ** 24,
+    //       ) +
+    //       (BigInt(
+    //         mask[0] + mask[1] * 2 ** 8 + mask[2] * 2 ** 16 + (mask[3] << 24),
+    //       ) <<
+    //         32n)
+    //     : BigInt(
+    //         mask[3] + mask[2] * 2 ** 8 + mask[1] * 2 ** 16 + mask[0] * 2 ** 24,
+    //       ) +
+    //       (BigInt(
+    //         mask[3] + mask[2] * 2 ** 8 + mask[1] * 2 ** 16 + (mask[0] << 24),
+    //       ) <<
+    //         32n);
+    const maskBase =
       endianType === 1
         ? BigInt(
             mask[0] + mask[1] * 2 ** 8 + mask[2] * 2 ** 16 + mask[3] * 2 ** 24,
-          ) +
-          (BigInt(
-            mask[0] + mask[1] * 2 ** 8 + mask[2] * 2 ** 16 + (mask[3] << 24),
-          ) <<
-            32n)
+          )
         : BigInt(
             mask[3] + mask[2] * 2 ** 8 + mask[1] * 2 ** 16 + mask[0] * 2 ** 24,
-          ) +
-          (BigInt(
-            mask[3] + mask[2] * 2 ** 8 + mask[1] * 2 ** 16 + (mask[0] << 24),
-          ) <<
-            32n);
+          );
+    const maskKey = maskBase + (maskBase << 32n);
     if (length <= memorySize) {
       output.set(jsMask(source, maskKey, length), offset);
     } else {
@@ -97,31 +113,39 @@ function initialize() {
         );
       }
     }
-    return output;
   }
 
   /**
    * @param {Uint8Array} buffer
    * @param {Uint8Array | number[]} mask
-   * @returns {Uint8Array}
+   * @returns {void}
    */
   function _unmask(buffer, mask) {
-    const maskKey =
+    // const maskKey =
+    //   endianType === 1
+    //     ? BigInt(
+    //         mask[0] + mask[1] * 2 ** 8 + mask[2] * 2 ** 16 + mask[3] * 2 ** 24,
+    //       ) +
+    //       (BigInt(
+    //         mask[0] + mask[1] * 2 ** 8 + mask[2] * 2 ** 16 + (mask[3] << 24),
+    //       ) <<
+    //         32n)
+    //     : BigInt(
+    //         mask[3] + mask[2] * 2 ** 8 + mask[1] * 2 ** 16 + mask[0] * 2 ** 24,
+    //       ) +
+    //       (BigInt(
+    //         mask[3] + mask[2] * 2 ** 8 + mask[1] * 2 ** 16 + (mask[0] << 24),
+    //       ) <<
+    //         32n);
+    const maskBase =
       endianType === 1
         ? BigInt(
             mask[0] + mask[1] * 2 ** 8 + mask[2] * 2 ** 16 + mask[3] * 2 ** 24,
-          ) +
-          (BigInt(
-            mask[0] + mask[1] * 2 ** 8 + mask[2] * 2 ** 16 + (mask[3] << 24),
-          ) <<
-            32n)
+          )
         : BigInt(
             mask[3] + mask[2] * 2 ** 8 + mask[1] * 2 ** 16 + mask[0] * 2 ** 24,
-          ) +
-          (BigInt(
-            mask[3] + mask[2] * 2 ** 8 + mask[1] * 2 ** 16 + (mask[0] << 24),
-          ) <<
-            32n);
+          );
+    const maskKey = maskBase + (maskBase << 32n);
     const length = buffer.length;
     if (length <= memorySize) {
       buffer.set(jsMask(buffer, maskKey, length), 0);
@@ -145,7 +169,6 @@ function initialize() {
         );
       }
     }
-    return buffer;
   }
 
   return {

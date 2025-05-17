@@ -18,7 +18,7 @@
  * @param {Uint8Array} output
  * @param {number} offset
  * @param {number} length
- * @returns {Uint8Array}
+ * @returns {void}
  */
 function mask(source, mask, output, offset, length) {
   const fixedLength = length - (length & 3);
@@ -29,7 +29,7 @@ function mask(source, mask, output, offset, length) {
   //   output[i + offset] = (masked & -0x1000000) >> 24;
   //   output[i + offset + 1] = (masked & 0xff0000) >> 16;
   //   output[i + offset + 2] = (masked & 0xff00) >> 8;
-  //   output[i + offset + 3] = masked & 0xff;
+  //   output[i + offset + 3] = (masked & 0xff) >> 0;
   // }
   // for (let i = fixedLength; i < length; ++i) {
   //   output[i + offset] = source[i] ^ mask[i & 3];
@@ -44,13 +44,12 @@ function mask(source, mask, output, offset, length) {
   for (let i = fixedLength; i < length; ++i) {
     output[i + offset] = source[i] ^ mask[i & 3];
   }
-  return output;
 }
 
 /**
  * @param {Uint8Array} buffer
  * @param {Uint8Array | number[]} mask
- * @returns {Uint8Array}
+ * @returns {void}
  */
 function unmask(buffer, mask) {
   const length = buffer.length;
@@ -65,7 +64,6 @@ function unmask(buffer, mask) {
   for (let i = fixedLength; i < length; ++i) {
     buffer[i] ^= mask[i & 3];
   }
-  return buffer;
 }
 
 module.exports = {
