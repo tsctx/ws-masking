@@ -9,8 +9,8 @@
  * }}
  */
 function initialize() {
-  const view = new Uint8Array(16 * 1024);
-  const viewAB = view.buffer;
+  const viewAB = new ArrayBuffer(16 * 1024);
+  const view = new Uint8Array(viewAB);
   const view32 = new Int32Array(viewAB);
   const memorySize = viewAB.byteLength;
 
@@ -69,7 +69,14 @@ function initialize() {
         ? mask[0] + mask[1] * 2 ** 8 + mask[2] * 2 ** 16 + (mask[3] << 24)
         : mask[3] + mask[2] * 2 ** 8 + mask[1] * 2 ** 16 + (mask[0] << 24);
     if (length <= memorySize) {
-      output.set(jsMask(source, maskKey, length), offset);
+      output.set(
+        jsMask(
+          source.length < length ? source : source.subarray(0, length),
+          maskKey,
+          length,
+        ),
+        offset,
+      );
     } else {
       let sourceOffset = 0;
       let outputOffset = offset;

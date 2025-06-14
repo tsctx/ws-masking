@@ -96,7 +96,14 @@ async function initialize() {
    */
   function _mask(source, mask, output, offset, length) {
     if (length <= memorySize) {
-      output.set(wasmMask(source, mask, length), offset);
+      output.set(
+        wasmMask(
+          source.length < length ? source : source.subarray(0, length),
+          mask,
+          length,
+        ),
+        offset,
+      );
     } else {
       let sourceOffset = 0;
       let outputOffset = offset;

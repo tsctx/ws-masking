@@ -86,7 +86,14 @@ function initialize() {
           );
     const maskKey = maskBase + (maskBase << 32n);
     if (length <= memorySize) {
-      output.set(jsMask(source, maskKey, length), offset);
+      output.set(
+        jsMask(
+          source.length < length ? source : source.subarray(0, length),
+          maskKey,
+          length,
+        ),
+        offset,
+      );
     } else {
       let sourceOffset = 0;
       let outputOffset = offset;

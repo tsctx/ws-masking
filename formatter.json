@@ -2,6 +2,7 @@
   "$schema": "https://biomejs.dev/schemas/1.9.4/schema.json",
   "formatter": {
     "ignore": [
+      "./coverage/*",
       "./dist/*",
       "./tsconfig.json",
       "./tsconfig.base.json",

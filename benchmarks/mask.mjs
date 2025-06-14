@@ -3,12 +3,10 @@
 import { randomBytes } from "node:crypto";
 import bufferutil from "bufferutil";
 import { bench, group, run } from "mitata";
-import wsmjl from "../collections/initialize.js";
 import jsSimple from "../collections/js-simple.js";
-import js from "../collections/js.js";
-import zeroPool from "../collections/zero-pool.js";
-import wsm from "../wasm-sync.js";
-const wsmj = wsmjl.initialize();
+import jsFast from "../collections/js.js";
+import wsm from "../index.js";
+import wasm from "../wasm-sync.js";
 
 const settings = {
   "4b": 4, // overhead
@@ -19,11 +17,14 @@ const settings = {
   "128Kib": 128 * 1024,
   "256Kib": 256 * 1024,
   "1MiB": 1024 * 1024,
+  "8MiB": 8 * 1024 * 1024,
   "16Mib": 16 * 1024 * 1024,
   "32Mib": 32 * 1024 * 1024,
   "64Mib": 64 * 1024 * 1024,
   "128Mib": 128 * 1024 * 1024,
   "256Mib": 256 * 1024 * 1024,
+  "512Mib": 512 * 1024 * 1024,
+  "1Gib": 1024 * 1024 * 1024,
 };
 
 const mask = randomBytes(4);
@@ -37,19 +38,16 @@ for (const [name, length] of Object.entries(settings)) {
 
   group(`mask - ${name}`, () => {
     bench("wsm - wasm-simd", () => {
+      return wasm.mask(buffer, mask, pool, 0, length);
+    });
+    bench("wsm", () => {
       return wsm.mask(buffer, mask, pool, 0, length);
-    });
-    bench("wsm - zero-pool", () => {
-      return zeroPool.mask(buffer, mask, pool, 0, length);
-    });
-    bench("wsm - js", () => {
-      return wsmj.mask(buffer, mask, pool, 0, length);
     });
     bench("js - simple", () => {
       return jsSimple.mask(buffer, mask, pool, 0, length);
     });
     bench("js", () => {
-      return js.mask(buffer, mask, pool, 0, length);
+      return jsFast.mask(buffer, mask, pool, 0, length);
     });
     bench("bufferutil", () => {
       return bufferutil.mask(buffer, mask, pool, 0, length);

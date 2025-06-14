@@ -9,8 +9,9 @@
  * }}
  */
 function __js_module() {
-  const _memory = new ArrayBuffer(1 << 16);
-  const _memory_i32 = new Int32Array(_memory);
+  let _memory = new ArrayBuffer(1 << 16);
+  let HEAP8 = new Int8Array(_memory);
+  let HEAP32 = new Int32Array(_memory);
 
   /**
    * Detect endianness.
@@ -43,21 +44,31 @@ function __js_module() {
     const maskKey = toLittleEndian(mask);
     const endIndex = (length + 3) >> 2;
     while (i < endIndex) {
-      _memory_i32[i] ^= maskKey;
-      _memory_i32[i + 1] ^= maskKey;
-      _memory_i32[i + 2] ^= maskKey;
-      _memory_i32[i + 3] ^= maskKey;
+      HEAP32[i] ^= maskKey;
+      HEAP32[i + 1] ^= maskKey;
+      HEAP32[i + 2] ^= maskKey;
+      HEAP32[i + 3] ^= maskKey;
       i += 4;
     }
   }
 
   /**@type {WebAssembly.Memory} */
   const memoryImpl = {
-    buffer: _memory,
-    grow(pages) {
-      throw new Error(
-        `Memory cannot be grown in this simulation. Attempted to grow by ${pages} pages.`,
-      );
+    get buffer() {
+      return _memory;
+    },
+    grow(pagesToAdd) {
+      const oldPages = (_memory.byteLength / 65536) | 0;
+      const newPages = (oldPages + pagesToAdd) | 0;
+      if (oldPages < newPages && newPages < 65536) {
+        const newMemory = new ArrayBuffer(newPages * 65536);
+        const newHEAP8 = new Int8Array(newMemory);
+        newHEAP8.set(HEAP8);
+        HEAP8 = newHEAP8;
+        HEAP32 = new Int32Array(newMemory);
+        _memory = newMemory;
+      }
+      return oldPages;
     },
   };
 

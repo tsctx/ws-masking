@@ -103,7 +103,14 @@ function initialize() {
     if (length > memorySize) {
       glowUp(length);
     }
-    output.set(wasmMask(source, mask, length), offset);
+    output.set(
+      wasmMask(
+        source.length < length ? source : source.subarray(0, length),
+        mask,
+        length,
+      ),
+      offset,
+    );
   }
 
   /**
