@@ -2,20 +2,20 @@
 
 "use strict";
 
-const standard = require("./assets/standard");
+const standard = require("./assets/standard2");
 const simd = require("./assets/simd");
-const js = require("./collections/js");
+const js = require("./index");
 const { __js_module } = require("./collections/internal-js-module");
 
 /**
  * @type {((source: Uint8Array, mask: Uint8Array | number[], output: Uint8Array, offset: number, length: number) => void) | undefined}
  */
-let _mask_ = undefined;
+let _mask_;
 
 /**
  * @type {((buffer: Uint8Array, mask: Uint8Array | number[]) => void) | undefined}
  */
-let _unmask_ = undefined;
+let _unmask_;
 
 /**
  * @returns {Promise<void>}
@@ -98,7 +98,7 @@ async function initialize() {
     if (length <= memorySize) {
       output.set(
         wasmMask(
-          source.length < length ? source : source.subarray(0, length),
+          source.length === length ? source : source.subarray(0, length),
           mask,
           length,
         ),

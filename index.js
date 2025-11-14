@@ -42,70 +42,46 @@ function _mask(source, mask, output, offset, length) {
     );
   }
   const byteOffset = output.byteOffset + offset;
-  // [0, 0, 0, 0, 0, 0, 0, 0, < 0, 0, 0, 0 >, < 0, 0, 0, 0 >, 0, 0, 0]
-  //  //////////  ^  <----->  ^<---int32---> | <---int32--->  ^
-  //  //////////  |        ^  |<four-chunks> | <four-chunks>  |
-  //  //////////  |<-offset|  |<-start                        |<-remaining
-  //  //////////  1.       2. 3.                              4.
-  // 1~2.
-  if ((byteOffset & 3) !== 0) {
-    if (length < 4) {
-      for (let i = 0; i < length; ++i) {
-        output[i + offset] ^= mask[i & 3];
-      }
-      return;
-    }
-    for (let i = 0, l = 4 - (byteOffset & 3); i < l; ++i) {
-      output[i + offset] ^= mask[i & 3];
-    }
+  let i = 0;
+
+  for (; i < length && ((byteOffset + i) & 3) !== 0; ++i) {
+    output[i + offset] ^= mask[i & 3];
   }
-  const int32FixedOffset =
-    (byteOffset & 3) === 0 ? byteOffset : byteOffset + (4 - (byteOffset & 3));
-  // fixing length
-  const fixedLength = length - (length & 3);
-  // convert Int32Array length
-  const int32Length = fixedLength >> 2;
-  const int32FixedLength =
-    (byteOffset & 3) !== 0 ? int32Length - 1 : int32Length;
-  const viewInt32 = new Int32Array(
-    output.buffer,
-    int32FixedOffset,
-    int32FixedLength,
-  );
-  const swapX = (4 - (byteOffset & 3)) & 3;
-  const maskKey =
-    swapX === 3
-      ? int32(mask[3], mask[0], mask[1], mask[2])
-      : swapX === 2
-        ? int32(mask[2], mask[3], mask[0], mask[1])
-        : swapX === 1
-          ? int32(mask[1], mask[2], mask[3], mask[0])
-          : int32(mask[0], mask[1], mask[2], mask[3]);
-  // 3. 4 vector masking.
-  const unrollInt32Length = int32FixedLength - (int32FixedLength & 7);
-  for (let startIndex = 0; startIndex < unrollInt32Length; startIndex += 8) {
-    viewInt32[startIndex] ^= maskKey;
-    viewInt32[startIndex + 1] ^= maskKey;
-    viewInt32[startIndex + 2] ^= maskKey;
-    viewInt32[startIndex + 3] ^= maskKey;
-    viewInt32[startIndex + 4] ^= maskKey;
-    viewInt32[startIndex + 5] ^= maskKey;
-    viewInt32[startIndex + 6] ^= maskKey;
-    viewInt32[startIndex + 7] ^= maskKey;
-  }
-  for (let i = unrollInt32Length; i < int32FixedLength; ++i) {
-    viewInt32[i] ^= maskKey;
-  }
-  // 4.
-  if (int32Length !== int32FixedLength) {
-    for (let i = fixedLength - (byteOffset & 3); i < fixedLength; ++i) {
-      output[i + offset] ^= mask[i & 3];
+
+  if (i < length) {
+    const maskKey =
+      i === 3
+        ? int32(mask[3], mask[0], mask[1], mask[2])
+        : i === 2
+          ? int32(mask[2], mask[3], mask[0], mask[1])
+          : i === 1
+            ? int32(mask[1], mask[2], mask[3], mask[0])
+            : int32(mask[0], mask[1], mask[2], mask[3]);
+
+    const i32al = (length - i) >> 2;
+    const i32a = new Int32Array(output.buffer, byteOffset + i, i32al);
+
+    const unrollI32al = i32al - (i32al & 7);
+    for (let j = 0; j < unrollI32al; j += 8) {
+      i32a[j] ^= maskKey;
+      i32a[j + 1] ^= maskKey;
+      i32a[j + 2] ^= maskKey;
+      i32a[j + 3] ^= maskKey;
+      i32a[j + 4] ^= maskKey;
+      i32a[j + 5] ^= maskKey;
+      i32a[j + 6] ^= maskKey;
+      i32a[j + 7] ^= maskKey;
     }
-  }
-  if (length !== fixedLength) {
-    for (let i = fixedLength; i < length; ++i) {
-      output[i + offset] ^= mask[i & 3];
+
+    for (let j = unrollI32al; j < i32al; ++j) {
+      i32a[j] ^= maskKey;
     }
+
+    i += i32al << 2;
+  }
+
+  for (; i < length; ++i) {
+    output[i + offset] ^= mask[i & 3];
   }
 }
 
@@ -117,70 +93,46 @@ function _mask(source, mask, output, offset, length) {
 function _unmask(buffer, mask) {
   const length = buffer.length;
   const byteOffset = buffer.byteOffset;
-  // [0, 0, 0, 0, 0, 0, 0, 0, < 0, 0, 0, 0 >, < 0, 0, 0, 0 >, 0, 0, 0]
-  //  //////////  ^  <----->  ^<---int32---> | <---int32--->  ^
-  //  //////////  |        ^  |<four-chunks> | <four-chunks>  |
-  //  //////////  |<-offset|  |<-start                        |<-remaining
-  //  //////////  1.       2. 3.                              4.
-  // 1~2.
-  if ((byteOffset & 3) !== 0) {
-    if (length < 4) {
-      for (let i = 0; i < length; ++i) {
-        buffer[i] ^= mask[i & 3];
-      }
-      return;
-    }
-    for (let i = 0, l = 4 - (byteOffset & 3); i < l; ++i) {
-      buffer[i] ^= mask[i & 3];
-    }
+  let i = 0;
+
+  for (; i < length && ((byteOffset + i) & 3) !== 0; ++i) {
+    buffer[i] ^= mask[i & 3];
   }
-  const int32FixedOffset =
-    (byteOffset & 3) === 0 ? byteOffset : byteOffset + (4 - (byteOffset & 3));
-  // fixing length
-  const fixedLength = length - (length & 3);
-  // convert Int32Array length
-  const int32Length = fixedLength >> 2;
-  const int32FixedLength =
-    (byteOffset & 3) !== 0 ? int32Length - 1 : int32Length;
-  const viewInt32 = new Int32Array(
-    buffer.buffer,
-    int32FixedOffset,
-    int32FixedLength,
-  );
-  const swapX = (4 - (byteOffset & 3)) & 3;
-  const maskKey =
-    swapX === 3
-      ? int32(mask[3], mask[0], mask[1], mask[2])
-      : swapX === 2
-        ? int32(mask[2], mask[3], mask[0], mask[1])
-        : swapX === 1
-          ? int32(mask[1], mask[2], mask[3], mask[0])
-          : int32(mask[0], mask[1], mask[2], mask[3]);
-  // 3. four-vector masking.
-  const unrollInt32Length = int32FixedLength - (int32FixedLength & 7);
-  for (let startIndex = 0; startIndex < unrollInt32Length; startIndex += 8) {
-    viewInt32[startIndex] ^= maskKey;
-    viewInt32[startIndex + 1] ^= maskKey;
-    viewInt32[startIndex + 2] ^= maskKey;
-    viewInt32[startIndex + 3] ^= maskKey;
-    viewInt32[startIndex + 4] ^= maskKey;
-    viewInt32[startIndex + 5] ^= maskKey;
-    viewInt32[startIndex + 6] ^= maskKey;
-    viewInt32[startIndex + 7] ^= maskKey;
-  }
-  for (let i = unrollInt32Length; i < int32FixedLength; ++i) {
-    viewInt32[i] ^= maskKey;
-  }
-  // 4.
-  if (int32Length !== int32FixedLength) {
-    for (let i = fixedLength - (byteOffset & 3); i < fixedLength; ++i) {
-      buffer[i] ^= mask[i & 3];
+
+  if (i < length) {
+    const maskKey =
+      i === 3
+        ? int32(mask[3], mask[0], mask[1], mask[2])
+        : i === 2
+          ? int32(mask[2], mask[3], mask[0], mask[1])
+          : i === 1
+            ? int32(mask[1], mask[2], mask[3], mask[0])
+            : int32(mask[0], mask[1], mask[2], mask[3]);
+
+    const i32al = (length - i) >> 2;
+    const i32a = new Int32Array(buffer.buffer, byteOffset + i, i32al);
+
+    const unrollI32al = i32al - (i32al & 7);
+    for (let j = 0; j < unrollI32al; j += 8) {
+      i32a[j] ^= maskKey;
+      i32a[j + 1] ^= maskKey;
+      i32a[j + 2] ^= maskKey;
+      i32a[j + 3] ^= maskKey;
+      i32a[j + 4] ^= maskKey;
+      i32a[j + 5] ^= maskKey;
+      i32a[j + 6] ^= maskKey;
+      i32a[j + 7] ^= maskKey;
     }
-  }
-  if (length !== fixedLength) {
-    for (let i = fixedLength; i < length; ++i) {
-      buffer[i] ^= mask[i & 3];
+
+    for (let j = unrollI32al; j < i32al; ++j) {
+      i32a[j] ^= maskKey;
     }
+
+    i += i32al << 2;
+  }
+
+  for (; i < length; ++i) {
+    buffer[i] ^= mask[i & 3];
   }
 }
 

@@ -3,8 +3,8 @@
 import { randomBytes } from "node:crypto";
 import bufferutil from "bufferutil";
 import { bench, group, run } from "mitata";
-import jsSimple from "../collections/js-simple.js";
 import jsFast from "../collections/js.js";
+import jsSimple from "../collections/js-simple.js";
 import wsm from "../index.js";
 import wasm from "../wasm-sync.js";
 
@@ -23,8 +23,6 @@ const settings = {
   "64Mib": 64 * 1024 * 1024,
   "128Mib": 128 * 1024 * 1024,
   "256Mib": 256 * 1024 * 1024,
-  "512Mib": 512 * 1024 * 1024,
-  "1Gib": 1024 * 1024 * 1024,
 };
 
 const mask = randomBytes(4);

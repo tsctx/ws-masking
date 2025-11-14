@@ -1,5 +1,3 @@
-//@ts-check
-
 import { randomBytes } from "node:crypto";
 import bufferutil from "bufferutil";
 import { bench, lineplot, run, summary } from "mitata-v1";

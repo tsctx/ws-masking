@@ -7,5 +7,5 @@
   },
   "extends": ["./tsconfig.base.json"],
   "include": ["./**/*.js"],
-  "exclude": ["./types/**", "./testing/**"]
+  "exclude": ["./types/*", "./testing/*", "./coverage/*"]
 }

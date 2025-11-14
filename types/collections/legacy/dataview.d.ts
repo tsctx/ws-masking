@@ -6,7 +6,7 @@
  * @param {number} length
  * @returns {void}
  */
-export function mask(
+declare function _mask(
   source: Uint8Array,
   mask: Uint8Array | number[],
   output: Uint8Array,
@@ -18,4 +18,5 @@ export function mask(
  * @param {Uint8Array | number[]} mask
  * @returns {void}
  */
-export function unmask(buffer: Uint8Array, mask: Uint8Array | number[]): void;
+declare function _unmask(buffer: Uint8Array, mask: Uint8Array | number[]): void;
+export { _mask as mask, _unmask as unmask };

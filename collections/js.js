@@ -11,6 +11,18 @@
  * @returns {void}
  */
 function mask(source, mask, output, offset, length) {
+  // const fixedLength = length - (length & 3);
+  // const { 0: mask0, 1: mask1, 2: mask2, 3: mask3 } = mask;
+  // for (let i = 0; i < fixedLength; i += 4) {
+  //   output[i + offset] = source[i] ^ mask0;
+  //   output[i + offset + 1] = source[i + 1] ^ mask1;
+  //   output[i + offset + 2] = source[i + 2] ^ mask2;
+  //   output[i + offset + 3] = source[i + 3] ^ mask3;
+  // }
+  // for (let i = fixedLength; i < length; ++i) {
+  //   output[i + offset] = source[i] ^ mask[i & 3];
+  // }
+
   if (source !== output || offset !== 0) {
     output.set(
       source.length === length ? source : source.subarray(0, length),

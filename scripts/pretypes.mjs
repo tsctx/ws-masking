@@ -1,6 +1,20 @@
 //@ts-check
+// biome-ignore-all lint: script file
+
 import { rm } from "node:fs/promises";
 import path from "node:path";
+
+/**
+ * @param {string} path
+ * @returns {Promise<void>}
+ */
+function rimraf(path) {
+  return rm(path, {
+    recursive: true,
+    force: true,
+    maxRetries: process.platform === "win32" ? 10 : 0,
+  });
+}
 
 /**
  * @param {string} url
@@ -9,8 +23,6 @@ function createFileInfo(url) {
   const i = "win32" === process.platform;
   let m = new URL(url).pathname;
   return (
-    // biome-ignore lint/suspicious/noAssignInExpressions: <explanation>
-    // biome-ignore lint/style/noCommaOperator: <explanation>
     m.startsWith("/") && i && (m = m.slice(1)),
     {
       __dirname: m
@@ -28,7 +40,7 @@ const getPath = (file) => path.resolve(__dirname, file);
 
 /**@param {string} file */
 const tryRemove = (file) => {
-  return rm(getPath(file), { recursive: true }).catch(() => null);
+  return rimraf(getPath(file)).catch(() => null);
 };
 
 tryRemove("../types").catch((err) => {

@@ -15,7 +15,6 @@ export class Stream {
    * @param {Uint8Array} binary
    */
   write(binary: Uint8Array): Uint8Array<ArrayBuffer>;
-  #private;
 }
 /**
  * @example
@@ -37,5 +36,4 @@ export class StreamWriter {
    * @returns {Uint8Array | null}
    */
   write(binary: Uint8Array): Uint8Array | null;
-  #private;
 }

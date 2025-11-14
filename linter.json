@@ -1,5 +1,6 @@
 {
-  "$schema": "https://biomejs.dev/schemas/1.9.4/schema.json",
+  "root": false,
+  "$schema": "https://biomejs.dev/schemas/2.3.5/schema.json",
   "linter": {
     "rules": {
       "recommended": true,
@@ -8,14 +9,27 @@
       },
       "suspicious": {
         "noRedundantUseStrict": "off"
+      },
+      "style": {
+        "noParameterAssign": "error",
+        "useAsConstAssertion": "error",
+        "useDefaultParameterLast": "error",
+        "useEnumInitializers": "error",
+        "useSelfClosingElements": "error",
+        "useSingleVarDeclarator": "error",
+        "noUnusedTemplateLiteral": "error",
+        "useNumberNamespace": "error",
+        "noInferrableTypes": "error",
+        "noUselessElse": "error"
       }
     },
-    "ignore": [
-      "./coverage/*",
-      "./dist/*",
-      "./tsconfig.json",
-      "./tsconfig.base.json",
-      "./tsconfig.types.json"
+    "includes": [
+      "**",
+      "!coverage/**/*",
+      "!dist/**/*",
+      "!tsconfig.json",
+      "!tsconfig.base.json",
+      "!tsconfig.types.json"
     ]
   }
 }

@@ -2,7 +2,7 @@
 
 "use strict";
 
-const standard = require("../../assets/standard");
+const standard = require("../../assets/standard2");
 const simd = require("../../assets/simd");
 const { __js_module } = require("../internal-js-module");
 

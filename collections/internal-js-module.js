@@ -64,9 +64,9 @@ function __js_module() {
         const newMemory = new ArrayBuffer(newPages * 65536);
         const newHEAP8 = new Int8Array(newMemory);
         newHEAP8.set(HEAP8);
+        _memory = newMemory;
         HEAP8 = newHEAP8;
         HEAP32 = new Int32Array(newMemory);
-        _memory = newMemory;
       }
       return oldPages;
     },

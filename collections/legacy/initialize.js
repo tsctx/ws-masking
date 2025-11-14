@@ -71,7 +71,7 @@ function initialize() {
     if (length <= memorySize) {
       output.set(
         jsMask(
-          source.length < length ? source : source.subarray(0, length),
+          source.length === length ? source : source.subarray(0, length),
           maskKey,
           length,
         ),

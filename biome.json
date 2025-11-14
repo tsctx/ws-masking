@@ -1,4 +1,12 @@
 {
-  "$schema": "https://biomejs.dev/schemas/1.9.4/schema.json",
-  "extends": ["./formatter.json", "./linter.json"]
+  "$schema": "https://biomejs.dev/schemas/2.3.5/schema.json",
+  "root": true,
+  "extends": ["./formatter.json", "./linter.json"],
+  "assist": {
+    "actions": {
+      "source": {
+        "organizeImports": "on"
+      }
+    }
+  }
 }

@@ -2,7 +2,7 @@
 
 "use strict";
 
-const standard = require("../assets/standard");
+const standard = require("../assets/standard2");
 const simd = require("../assets/simd");
 const { __js_module } = require("./internal-js-module");
 
@@ -91,7 +91,7 @@ function initialize() {
     if (length <= memorySize) {
       output.set(
         wasmMask(
-          source.length < length ? source : source.subarray(0, length),
+          source.length === length ? source : source.subarray(0, length),
           mask,
           length,
         ),
