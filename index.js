@@ -22,8 +22,8 @@ const endianType = detectEndianness();
  */
 function int32(k1, k2, k3, k4) {
   return endianType === 1
-    ? k1 + k2 * 2 ** 8 + k3 * 2 ** 16 + (k4 << 24)
-    : k4 + k3 * 2 ** 8 + k2 * 2 ** 16 + (k1 << 24);
+    ? k1 | (k2 << 8) | (k3 << 16) | (k4 << 24)
+    : k4 | (k3 << 8) | (k2 << 16) | (k1 << 24);
 }
 
 /**
@@ -58,7 +58,7 @@ function _mask(source, mask, output, offset, length) {
             ? int32(mask[1], mask[2], mask[3], mask[0])
             : int32(mask[0], mask[1], mask[2], mask[3]);
 
-    const i32al = (length - i) >> 2;
+    const i32al = (length - i) >>> 2;
     const i32a = new Int32Array(output.buffer, byteOffset + i, i32al);
 
     const unrollI32al = i32al - (i32al & 7);
@@ -77,7 +77,7 @@ function _mask(source, mask, output, offset, length) {
       i32a[j] ^= maskKey;
     }
 
-    i += i32al << 2;
+    i += (i32al << 2) >>> 0;
   }
 
   for (; i < length; ++i) {
@@ -109,7 +109,7 @@ function _unmask(buffer, mask) {
             ? int32(mask[1], mask[2], mask[3], mask[0])
             : int32(mask[0], mask[1], mask[2], mask[3]);
 
-    const i32al = (length - i) >> 2;
+    const i32al = (length - i) >>> 2;
     const i32a = new Int32Array(buffer.buffer, byteOffset + i, i32al);
 
     const unrollI32al = i32al - (i32al & 7);
@@ -128,7 +128,7 @@ function _unmask(buffer, mask) {
       i32a[j] ^= maskKey;
     }
 
-    i += i32al << 2;
+    i += (i32al << 2) >>> 0;
   }
 
   for (; i < length; ++i) {

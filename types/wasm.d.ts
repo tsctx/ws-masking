@@ -1,4 +1,12 @@
-export function initialize(): Promise<void>;
+declare const _exports: {
+  /**
+   * @returns {Promise<void>}
+   */
+  initialize: () => Promise<void>;
+  readonly mask: typeof _mask;
+  readonly unmask: typeof _unmask;
+};
+export = _exports;
 /**
  * @param {Uint8Array} source
  * @param {Uint8Array} mask
@@ -7,7 +15,7 @@ export function initialize(): Promise<void>;
  * @param {number} length
  * @returns {void}
  */
-export function mask(
+declare function _mask(
   source: Uint8Array,
   mask: Uint8Array,
   output: Uint8Array,
@@ -19,4 +27,4 @@ export function mask(
  * @param {Uint8Array} mask
  * @returns {void}
  */
-export function unmask(buffer: Uint8Array, mask: Uint8Array): void;
+declare function _unmask(buffer: Uint8Array, mask: Uint8Array): void;

@@ -2,7 +2,7 @@
 
 import { randomBytes } from "node:crypto";
 import bufferutil from "bufferutil";
-import { bench, group, run } from "mitata";
+import { bench, group, run } from "mitata-v1";
 import jsFast from "../collections/js.js";
 import jsSimple from "../collections/js-simple.js";
 import wsm from "../index.js";
@@ -49,6 +49,9 @@ for (const [name, length] of Object.entries(settings)) {
     });
     bench("bufferutil", () => {
       return bufferutil.mask(buffer, mask, pool, 0, length);
+    });
+    bench("no mask", () => {
+      return pool.set(buffer, 0);
     });
   });
 }

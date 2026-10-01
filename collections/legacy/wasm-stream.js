@@ -13,7 +13,7 @@ const { __js_module } = require("../internal-js-module");
  * @param {number} k4
  */
 function int32(k1, k2, k3, k4) {
-  return k1 + k2 * 2 ** 8 + k3 * 2 ** 16 + (k4 << 24);
+  return k1 | (k2 << 8) | (k3 << 16) | (k4 << 24);
 }
 
 function loadWasm() {

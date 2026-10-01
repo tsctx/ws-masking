@@ -22,8 +22,8 @@ const endianType = detectEndianness();
  */
 function int32(k1, k2, k3, k4) {
   return endianType === 1
-    ? k1 + k2 * 2 ** 8 + k3 * 2 ** 16 + (k4 << 24)
-    : k4 + k3 * 2 ** 8 + k2 * 2 ** 16 + (k1 << 24);
+    ? k1 | (k2 << 8) | (k3 << 16) | (k4 << 24)
+    : k4 | (k3 << 8) | (k2 << 16) | (k1 << 24);
 }
 
 /**
@@ -64,7 +64,7 @@ function _mask(source, mask, output, offset, length) {
   // fixing length
   const fixedLength = length - (length & 3);
   // convert Int32Array length
-  const int32Length = fixedLength >> 2;
+  const int32Length = fixedLength >>> 2;
   const int32FixedLength =
     (byteOffset & 3) !== 0 ? int32Length - 1 : int32Length;
   const viewInt32 = new Int32Array(
@@ -139,7 +139,7 @@ function _unmask(buffer, mask) {
   // fixing length
   const fixedLength = length - (length & 3);
   // convert Int32Array length
-  const int32Length = fixedLength >> 2;
+  const int32Length = fixedLength >>> 2;
   const int32FixedLength =
     (byteOffset & 3) !== 0 ? int32Length - 1 : int32Length;
   const viewInt32 = new Int32Array(

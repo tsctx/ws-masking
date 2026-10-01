@@ -23,8 +23,8 @@ const endianType = detectEndianness() === 1;
  */
 function int32(k1, k2, k3, k4) {
   return endianType
-    ? k1 + k2 * 2 ** 8 + k3 * 2 ** 16 + (k4 << 24)
-    : k4 + k3 * 2 ** 8 + k2 * 2 ** 16 + (k1 << 24);
+    ? k1 | (k2 << 8) | (k3 << 16) | (k4 << 24)
+    : k4 | (k3 << 8) | (k2 << 16) | (k1 << 24);
 }
 
 /**
@@ -49,7 +49,7 @@ function _mask(source, mask, output, offset, length) {
 
   const maskKey = int32(mask[0], mask[1], mask[2], mask[3]);
 
-  const len = length >> 2;
+  const len = length >>> 2;
 
   for (let i = 0; i < len; ++i) {
     outputView.setInt32(
@@ -59,7 +59,7 @@ function _mask(source, mask, output, offset, length) {
     );
   }
 
-  for (let i = len << 2; i < length; ++i) {
+  for (let i = (len << 2) >>> 0; i < length; ++i) {
     output[i + offset] = source[i] ^ mask[i];
   }
 }
@@ -80,7 +80,7 @@ function _unmask(buffer, mask) {
 
   const maskKey = int32(mask[0], mask[1], mask[2], mask[3]);
 
-  const len = length >> 2;
+  const len = length >>> 2;
 
   for (let i = 0; i < len; ++i) {
     bufferView.setInt32(
@@ -90,7 +90,7 @@ function _unmask(buffer, mask) {
     );
   }
 
-  for (let i = len << 2; i < length; ++i) {
+  for (let i = (len << 2) >>> 0; i < length; ++i) {
     buffer[i] ^= mask[i];
   }
 }

@@ -1,3 +1,8 @@
+declare const _exports: {
+  Stream: typeof Stream;
+  StreamWriter: typeof StreamWriter;
+};
+export = _exports;
 /**
  * @example
  * ```ts
@@ -6,7 +11,7 @@
  * const unmasked = stream.write(data); // unmasked & copied & should be less or equal 16Kib
  * ```
  */
-export class Stream {
+declare class Stream {
   /**
    * @param {Uint8Array} mask
    */
@@ -26,7 +31,7 @@ export class Stream {
  * }
  * ```
  */
-export class StreamWriter {
+declare class StreamWriter {
   /**
    * @param {Uint8Array} mask
    */

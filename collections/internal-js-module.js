@@ -53,6 +53,7 @@ function __js_module() {
   }
 
   /**@type {WebAssembly.Memory} */
+  //@ts-ignore
   const memoryImpl = {
     get buffer() {
       return _memory;

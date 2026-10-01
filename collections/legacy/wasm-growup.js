@@ -83,7 +83,7 @@ function initialize() {
     view.set(buffer, 0);
     // WebAssembly memory is always little-endian.
     execute(
-      mask[0] + mask[1] * 2 ** 8 + mask[2] * 2 ** 16 + (mask[3] << 24),
+      mask[0] | (mask[1] << 8) | (mask[2] << 16) | (mask[3] << 24),
       length,
     );
     return length === memorySize

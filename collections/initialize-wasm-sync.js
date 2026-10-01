@@ -65,17 +65,14 @@ function initialize() {
 
   /**
    * @param {Uint8Array} buffer
-   * @param {Uint8Array | number[]} mask
+   * @param {number} maskKey
    * @param {number} length
    * @returns {Uint8Array}
    */
-  function wasmMask(buffer, mask, length) {
+  function wasmMask(buffer, maskKey, length) {
     view.set(buffer, 0);
     // WebAssembly memory is always little-endian.
-    execute(
-      mask[0] + mask[1] * 2 ** 8 + mask[2] * 2 ** 16 + (mask[3] << 24),
-      length,
-    );
+    execute(maskKey, length);
     return length === memorySize ? view : new Uint8Array(viewAB, 0, length);
   }
 
@@ -88,11 +85,13 @@ function initialize() {
    * @returns {void}
    */
   function _mask(source, mask, output, offset, length) {
+    const maskKey =
+      mask[0] | (mask[1] << 8) | (mask[2] << 16) | (mask[3] << 24);
     if (length <= memorySize) {
       output.set(
         wasmMask(
           source.length === length ? source : source.subarray(0, length),
-          mask,
+          maskKey,
           length,
         ),
         offset,
@@ -104,7 +103,7 @@ function initialize() {
         output.set(
           wasmMask(
             source.subarray(sourceOffset, sourceOffset + memorySize),
-            mask,
+            maskKey,
             memorySize,
           ),
           outputOffset,
@@ -116,7 +115,7 @@ function initialize() {
         output.set(
           wasmMask(
             source.subarray(sourceOffset, length),
-            mask,
+            maskKey,
             length - sourceOffset,
           ),
           outputOffset,
@@ -131,16 +130,18 @@ function initialize() {
    * @returns {void}
    */
   function _unmask(buffer, mask) {
+    const maskKey =
+      mask[0] | (mask[1] << 8) | (mask[2] << 16) | (mask[3] << 24);
     const length = buffer.length;
     if (length <= memorySize) {
-      buffer.set(wasmMask(buffer, mask, length), 0);
+      buffer.set(wasmMask(buffer, maskKey, length), 0);
     } else {
       let offset = 0;
       while (offset + memorySize < length) {
         buffer.set(
           wasmMask(
             buffer.subarray(offset, offset + memorySize),
-            mask,
+            maskKey,
             memorySize,
           ),
           offset,
@@ -149,7 +150,7 @@ function initialize() {
       }
       if (offset !== length) {
         buffer.set(
-          wasmMask(buffer.subarray(offset, length), mask, length - offset),
+          wasmMask(buffer.subarray(offset, length), maskKey, length - offset),
           offset,
         );
       }

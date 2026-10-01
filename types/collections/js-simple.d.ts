@@ -1,3 +1,8 @@
+declare const _exports: {
+  mask: typeof mask;
+  unmask: typeof unmask;
+};
+export = _exports;
 /**
  * @param {Uint8Array} source
  * @param {Uint8Array | number[]} mask
@@ -6,7 +11,7 @@
  * @param {number} length
  * @returns {void}
  */
-export function mask(
+declare function mask(
   source: Uint8Array,
   mask: Uint8Array | number[],
   output: Uint8Array,
@@ -18,4 +23,4 @@ export function mask(
  * @param {Uint8Array | number[]} mask
  * @returns {void}
  */
-export function unmask(buffer: Uint8Array, mask: Uint8Array | number[]): void;
+declare function unmask(buffer: Uint8Array, mask: Uint8Array | number[]): void;

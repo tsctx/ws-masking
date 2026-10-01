@@ -66,8 +66,8 @@ function initialize() {
   function _mask(source, mask, output, offset, length) {
     const maskKey =
       endianType === 1
-        ? mask[0] + mask[1] * 2 ** 8 + mask[2] * 2 ** 16 + (mask[3] << 24)
-        : mask[3] + mask[2] * 2 ** 8 + mask[1] * 2 ** 16 + (mask[0] << 24);
+        ? mask[0] | (mask[1] << 8) | (mask[2] << 16) | (mask[3] << 24)
+        : mask[3] | (mask[2] << 8) | (mask[1] << 16) | (mask[0] << 24);
     if (length <= memorySize) {
       output.set(
         jsMask(
@@ -113,9 +113,8 @@ function initialize() {
   function _unmask(buffer, mask) {
     const maskKey =
       endianType === 1
-        ? (mask[0] + mask[1] * 2 ** 8 + mask[2] * 2 ** 16 + (mask[3] << 24)) >>
-          0
-        : mask[3] + mask[2] * 2 ** 8 + mask[1] * 2 ** 16 + (mask[0] << 24);
+        ? (mask[0] | (mask[1] << 8) | (mask[2] << 16) | (mask[3] << 24)) >> 0
+        : mask[3] | (mask[2] << 8) | (mask[1] << 16) | (mask[0] << 24);
     const length = buffer.length;
     if (length <= memorySize) {
       buffer.set(jsMask(buffer, maskKey, length), 0);

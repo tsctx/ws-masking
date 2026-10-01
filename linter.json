@@ -1,9 +1,9 @@
 {
   "root": false,
-  "$schema": "https://biomejs.dev/schemas/2.3.5/schema.json",
+  "$schema": "https://biomejs.dev/schemas/2.5.13/schema.json",
   "linter": {
     "rules": {
-      "recommended": true,
+      "preset": "recommended",
       "complexity": {
         "useArrowFunction": "off"
       },
@@ -29,7 +29,8 @@
       "!dist/**/*",
       "!tsconfig.json",
       "!tsconfig.base.json",
-      "!tsconfig.types.json"
+      "!tsconfig.types.json",
+      "!*.log/**"
     ]
   }
 }
